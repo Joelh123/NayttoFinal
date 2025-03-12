@@ -2,7 +2,7 @@ POST http://localhost:3001/api/markers
 Content-Type: application/json
 
 {
-    "latlng": [36, 28],
-    "title": "Paikka 4",
-    "description": "Tietoa paikasta 4"
+    "latlng": [86, 28],
+    "title": "Paikka 5",
+    "description": "Tietoa paikasta 5"
 }

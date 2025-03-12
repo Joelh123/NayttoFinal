@@ -1,41 +1,42 @@
 const express = require('express')
 const app = express()
+require('dotenv').config()
 
+const Marker = require('./models/marker')
+
+app.use(express.static('dist'))
+const cors = require('cors')
+app.use(cors())
 app.use(express.json())
-
-markers = [
-    {
-        id: 0,
-        latlng: [16, 28],
-        title: 'Paikka 1',
-        description: 'Tietoa paikasta 1'
-    },
-    {
-        id: 1,
-        latlng: [26, 28],
-        title: 'Paikka 2',
-        description: 'Tietoa paikasta 2'
-    },
-    {
-        id: 2,
-        latlng: [36, 28],
-        title: 'Paikka 3',
-        description: 'Tietoa paikasta 3'
-    },
-]
 
 app.get('/', (request, response) => {
     response.send('<h1>nothing</h1>')
 })
 
 app.get('/api/markers', (request, response) => {
-    response.json(markers)
+    Marker.find({}).then(markers => {
+        response.json(markers)
+    })
 })
 
-app.post('/api/markers', (request, response) => {
-    const marker = request.body
-    console.log(marker)
-    response.json(marker)
+app.post('/api/markers', (request, response, next) => {
+    const body = request.body
+
+    if (body.description === undefined || body.title === undefined || body.latlng === undefined) {
+        return response.status(400).json({ error: 'content missing' })
+    }
+
+    const markerObject = new Marker({
+        latlng: body.latlng,
+        title: body.title,
+        description: body.description
+    })
+
+    markerObject.save()
+        .then(savedMarker => {
+        response.json(savedMarker)
+        })
+        .catch(error => next(error))
 })
 
 const PORT = 3001
