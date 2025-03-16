@@ -9,14 +9,20 @@ const cors = require('cors')
 app.use(cors())
 app.use(express.json())
 
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+
 app.get('/', (request, response) => {
     response.send('<h1>nothing</h1>')
 })
 
-app.get('/api/markers', (request, response) => {
-    Marker.find({}).then(markers => {
+app.get('/api/markers', (request, response, next) => {
+    Marker.find({})
+        .then(markers => {
         response.json(markers)
-    })
+        })
+        .catch(error => next(error))
 })
 
 app.post('/api/markers', (request, response, next) => {
@@ -39,7 +45,9 @@ app.post('/api/markers', (request, response, next) => {
         .catch(error => next(error))
 })
 
-const PORT = 3001
+app.use(unknownEndpoint)
+
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })

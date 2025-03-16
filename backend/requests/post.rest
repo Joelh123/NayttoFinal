@@ -2,7 +2,7 @@ POST http://localhost:3001/api/markers
 Content-Type: application/json
 
 {
-    "latlng": [86, 28],
-    "title": "Paikka 5",
-    "description": "Tietoa paikasta 5"
+    "latlng": [61.692198454174836, 27.27239090973429],
+    "title": "Naisvuori",
+    "description": "Naisvuoren torni"
 }

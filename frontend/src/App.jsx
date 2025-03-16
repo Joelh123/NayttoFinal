@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MapContainer } from 'react-leaflet/MapContainer'
 import { TileLayer } from 'react-leaflet/TileLayer'
 import { useMap, useMapEvents } from 'react-leaflet/hooks'
 import { Marker } from 'react-leaflet/Marker'
 import { Popup } from 'react-leaflet/Popup'
-
+import markerService from './service/markers'
 
 
 const LocationMarker = ({ position, setPosition }) => {
@@ -15,9 +15,11 @@ const LocationMarker = ({ position, setPosition }) => {
     },
   }) 
   
-  setInterval(() => {
-    map.locate()
-  }, 5000)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      map.locate()
+    }, 5000)
+  }, [map])
 
   return position === null ? null : (
     <Marker position={position}>
@@ -26,25 +28,105 @@ const LocationMarker = ({ position, setPosition }) => {
   )
 }
 
+const ShowMarkers = ({ position, markers }) => (
+  markers.map(marker => <Marker key={marker.id} position={marker.latlng}><ShowPopup position={position} marker={marker}></ShowPopup></Marker>)
+)
+
+const ShowPopup = ({ position, marker }) => {
+  let lat1 = position[0]
+  let lng1 = position[1]
+  let lat2 = marker.latlng[0]
+  let lng2 = marker.latlng[1]
+
+  let dLat = ((lat2 - lat1) * Math.PI) / 180.0;
+  let dlng = ((lng2 - lng1) * Math.PI) / 180.0;
+
+  lat1 = (lat1 * Math.PI) / 180.0;
+  lat2 = (lat2 * Math.PI) / 180.0;
+
+  let a =
+    Math.pow(Math.sin(dLat / 2), 2) +
+    Math.pow(Math.sin(dlng / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
+  let rad = 6371;
+  let c = 2 * Math.asin(Math.sqrt(a));
+
+  console.log((rad * c).toFixed(1))
+
+  return (
+    <Popup>
+      moi
+    </Popup>
+  )
+}
+
 const App = () => {
   const [position, setPosition] = useState(null)
+  const [markers, setMarkers] = useState([])
+
+  // useEffect(() => {
+  //   markerService
+  //     .getAll()
+  //     .then(initialMarkers => {
+  //       setMarkers(initialMarkers)
+  //     })
+  // }, [])
+
+  const testMarkers = [
+    {
+      id: 0,
+      latlng: [
+        61.68701285124263,
+        27.266642536228886
+      ],
+      title: "paikka 0",
+      description: "tietoa paikasta 0"
+    },
+    {
+      id: 1,
+      latlng: [
+        61.68778443915931,
+        27.278801201368967
+      ],
+      title: "paikka 1",
+      description: "tietoa paikasta 1"
+    },
+    {
+      id: 2,
+      latlng: [
+        61.693714343527674,
+        27.26734346512269
+      ],
+      title: "paikka 2",
+      description: "tietoa paikasta 2"
+    },
+    {
+      id: 3,
+      latlng: [
+        61.69041189975269,
+        27.24149701054094
+      ],
+      title: "paikka 3",
+      description: "tietoa paikasta 3"
+    }
+  ]
+
+  useEffect(() => {
+    setMarkers(testMarkers)
+    setPosition([61.68693663746489, 27.26595425759984])
+  }, [])
 
   const mapRef = useRef(null);
-  const latitude = 51.505;
-  const longitude = -0.09;
+  const latitude = 61.68784229131595
+  const lnggitude = 27.273137634746142;
   
   return (
-    <MapContainer center={[latitude, longitude]} zoom={13} ref={mapRef} style={{height: "98.2vh", width: "99.2vw"}}>
+    <MapContainer center={[latitude, lnggitude]} zoom={17} ref={mapRef} style={{height: "98.2vh", width: "99.2vw"}}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={[latitude, longitude]}>
-        <Popup>
-          L I dkkd
-        </Popup>
-      </Marker>
-      <LocationMarker map={mapRef} position={position} setPosition={setPosition} />
+      <ShowMarkers position={position} markers={markers} />
+      {/* <LocationMarker map={mapRef} position={position} setPosition={setPosition} /> */}
     </MapContainer>
   )
 }
