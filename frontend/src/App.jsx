@@ -18,7 +18,7 @@ const LocationMarker = ({ position, setPosition }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       map.locate()
-    }, 5000)
+    }, 10000)
   }, [map])
 
   return position === null ? null : (
@@ -33,8 +33,8 @@ const ShowMarkers = ({ position, markers }) => (
 )
 
 const ShowPopup = ({ position, marker }) => {
-  let lat1 = position[0]
-  let lng1 = position[1]
+  let lat1 = position.lat
+  let lng1 = position.lng
   let lat2 = marker.latlng[0]
   let lng2 = marker.latlng[1]
 
@@ -50,9 +50,11 @@ const ShowPopup = ({ position, marker }) => {
   let rad = 6371;
   let c = 2 * Math.asin(Math.sqrt(a));
 
-  console.log((rad * c).toFixed(1))
+  let distanceTo = ((rad * c) * 1000).toFixed(1) 
 
-  return (
+  console.log(distanceTo)
+
+  return distanceTo > 40 ? null :(
     <Popup>
       moi
     </Popup>
@@ -112,7 +114,10 @@ const App = () => {
 
   useEffect(() => {
     setMarkers(testMarkers)
-    setPosition([61.68693663746489, 27.26595425759984])
+    setPosition({
+        lat: 61.68693663746489,
+        lng: 27.26595425759984
+      })
   }, [])
 
   const mapRef = useRef(null);
@@ -126,7 +131,7 @@ const App = () => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <ShowMarkers position={position} markers={markers} />
-      {/* <LocationMarker map={mapRef} position={position} setPosition={setPosition} /> */}
+      <LocationMarker map={mapRef} position={position} setPosition={setPosition} /> 
     </MapContainer>
   )
 }
