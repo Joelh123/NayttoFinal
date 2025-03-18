@@ -6,6 +6,36 @@ import { Marker } from 'react-leaflet/Marker'
 import { Popup } from 'react-leaflet/Popup'
 import markerService from './service/markers'
 
+const LoginPage = ({ loggedIn, setLoggedIn }) => {
+
+  return (
+    <div>
+      <h1>Kirjaudu sisään</h1>
+      <button onClick={() => setLoggedIn(true)}>Kirjaudu</button>
+    </div>
+  )
+}
+
+const MainApp = ({ position, markers, setPosition, loggedIn, setLoggedIn }) => {
+
+  const mapRef = useRef(null);
+  const latitude = 61.68784229131595
+  const lnggitude = 27.273137634746142;
+
+  return (
+    <div>
+      <button onClick={() => setLoggedIn(false)}>Poistu</button>
+      <MapContainer center={[latitude, lnggitude]} zoom={17} ref={mapRef} style={{height: "98.2vh", width: "99.2vw"}}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <ShowMarkers position={position} markers={markers} />
+        <LocationMarker map={mapRef} position={position} setPosition={setPosition} /> 
+      </MapContainer>
+    </div>
+  )
+}
 
 const LocationMarker = ({ position, setPosition }) => {
 
@@ -56,7 +86,7 @@ const ShowPopup = ({ position, marker }) => {
 
   return distanceTo > 40 ? null :(
     <Popup>
-      moi
+      {marker.description}
     </Popup>
   )
 }
@@ -64,6 +94,7 @@ const ShowPopup = ({ position, marker }) => {
 const App = () => {
   const [position, setPosition] = useState(null)
   const [markers, setMarkers] = useState([])
+  const [loggedIn, setLoggedIn] = useState(false)
 
   // useEffect(() => {
   //   markerService
@@ -119,21 +150,15 @@ const App = () => {
         lng: 27.26595425759984
       })
   }, [])
-
-  const mapRef = useRef(null);
-  const latitude = 61.68784229131595
-  const lnggitude = 27.273137634746142;
-  
-  return (
-    <MapContainer center={[latitude, lnggitude]} zoom={17} ref={mapRef} style={{height: "98.2vh", width: "99.2vw"}}>
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <ShowMarkers position={position} markers={markers} />
-      <LocationMarker map={mapRef} position={position} setPosition={setPosition} /> 
-    </MapContainer>
-  )
+  if (!loggedIn) {
+    return (
+      <LoginPage loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+    )
+  } else {
+    return (
+      <MainApp position={position} markers={markers} setPosition={setPosition} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+    )
+  }
 }
 
 export default App
