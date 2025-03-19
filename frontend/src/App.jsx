@@ -58,9 +58,20 @@ const LocationMarker = ({ position, setPosition }) => {
   )
 }
 
-const ShowMarkers = ({ position, markers }) => (
-  markers.map(marker => <Marker key={marker.id} position={marker.latlng}><ShowPopup position={position} marker={marker}></ShowPopup></Marker>)
-)
+const ShowMarkers = ({ position, markers }) => {
+  const markerElements = [];
+  
+  for (let i = 0; i < markers.length; i++) {
+    const marker = markers[i];
+    markerElements.push(
+      <Marker key={marker.id} position={marker.latlng}>
+        <ShowPopup position={position} marker={marker} />
+      </Marker>
+    );
+  }
+
+  return <>{markerElements}</>;
+};
 
 const ShowPopup = ({ position, marker }) => {
   let lat1 = position.lat
