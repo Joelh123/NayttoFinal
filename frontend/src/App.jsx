@@ -6,18 +6,25 @@ import { Marker } from 'react-leaflet/Marker'
 import { Popup } from 'react-leaflet/Popup'
 import markerService from './service/markers'
 
-const LogInPage = ({ setLoggedIn }) => {
+const LogInPage = ({ setLoggedIn, users }) => {
   const handleLogIn = e => {
     e.preventDefault();
     console.log(e.target.accountName.value)
 
-    if (!e.target.accountName.value) {
-      alert('lisää s-posti')
-    } else if (!e.target.password.value) {
-      alert('lisää salasana')
-    } else {
-      setLoggedIn(true)
+    for (const user of users) {
+      if (!e.target.accountName.value) {
+        alert('lisää s-posti')
+        return
+      } else if (!e.target.password.value) {
+        alert('lisää salasana')
+        return
+      } else if (e.target.accountName.value == user.name && e.target.password.value == user.password) {
+        setLoggedIn(true)
+        return
+      }
     }
+
+    alert('väärä salasana ja käyttäjätunnus yhdistelmä')
   }
 
   return (
@@ -196,7 +203,7 @@ const App = () => {
   }, [])
   if (!loggedIn) {
     return (
-      <LogInPage loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+      <LogInPage setLoggedIn={setLoggedIn} users={users} />
     )
   } else {
     return (
