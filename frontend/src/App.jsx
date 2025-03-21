@@ -6,17 +6,37 @@ import { Marker } from 'react-leaflet/Marker'
 import { Popup } from 'react-leaflet/Popup'
 import markerService from './service/markers'
 
-const LoginPage = ({ loggedIn, setLoggedIn }) => {
+const LogInPage = ({ setLoggedIn }) => {
+  const handleLogIn = e => {
+    e.preventDefault();
+    console.log(e.target.accountName.value)
+
+    if (!e.target.accountName.value) {
+      alert('lisää s-posti')
+    } else if (!e.target.password.value) {
+      alert('lisää salasana')
+    } else {
+      setLoggedIn(true)
+    }
+  }
 
   return (
     <div>
       <h1>Kirjaudu sisään</h1>
-      <button onClick={() => setLoggedIn(true)}>Kirjaudu</button>
+      <form onSubmit={handleLogIn}>
+        <div>
+          <input type='text' name='accountName' placeholder='Käyttäjätunnus'/>
+        </div>
+        <div>
+          <input type='password' name='password' placeholder='Salasana'  />
+        </div>
+        <button>Kirjaudu</button>
+      </form>
     </div>
   )
 }
 
-const MainApp = ({ position, markers, setPosition, loggedIn, setLoggedIn }) => {
+const MainApp = ({ position, markers, setPosition, setLoggedIn }) => {
 
   const mapRef = useRef(null);
   const latitude = 61.68784229131595
@@ -154,6 +174,19 @@ const App = () => {
     }
   ]
 
+  const users = [
+    {
+      id: 0,
+      name: 'Joel',
+      password: '123'
+    },
+    {
+      id: 0,
+      name: 'Eetu',
+      password: '321'
+    }
+  ]
+
   useEffect(() => {
     setMarkers(testMarkers)
     setPosition({
@@ -163,7 +196,7 @@ const App = () => {
   }, [])
   if (!loggedIn) {
     return (
-      <LoginPage loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+      <LogInPage loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
     )
   } else {
     return (
