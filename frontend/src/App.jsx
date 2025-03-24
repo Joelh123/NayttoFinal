@@ -6,7 +6,7 @@ import { Marker } from 'react-leaflet/Marker'
 import { Popup } from 'react-leaflet/Popup'
 import markerService from './service/markers'
 
-const LogInPage = ({ setLoggedIn, users }) => {
+const LogInPage = ({ setLoggedIn, users, setCurrentUser }) => {
   const handleLogIn = e => {
     e.preventDefault();
     console.log(e.target.accountName.value)
@@ -19,6 +19,7 @@ const LogInPage = ({ setLoggedIn, users }) => {
         alert('lisää salasana')
         return
       } else if (e.target.accountName.value == user.name && e.target.password.value == user.password) {
+        setCurrentUser(user)
         setLoggedIn(true)
         return
       }
@@ -43,7 +44,7 @@ const LogInPage = ({ setLoggedIn, users }) => {
   )
 }
 
-const MainApp = ({ position, markers, setPosition, setLoggedIn }) => {
+const MainApp = ({ position, markers, setPosition, setLoggedIn, currentUser }) => {
 
   const mapRef = useRef(null);
   const latitude = 61.68784229131595
@@ -57,7 +58,7 @@ const MainApp = ({ position, markers, setPosition, setLoggedIn }) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <ShowMarkers position={position} markers={markers} />
+        <ShowMarkers position={position} markers={markers} currentUser={currentUser} />
         <LocationMarker map={mapRef} position={position} setPosition={setPosition} /> 
       </MapContainer>
     </div>
@@ -85,14 +86,16 @@ const LocationMarker = ({ position, setPosition }) => {
   )
 }
 
-const ShowMarkers = ({ position, markers }) => {
-  const markerElements = [];
-  
+const ShowMarkers = ({ position, markers, currentUser }) => {
+  let markerElements = [];
+
   for (let i = 0; i < markers.length; i++) {
     const marker = markers[i];
+    let visited = currentUser.visited.includes(marker.title);
+
     markerElements.push(
-      <Marker key={marker.id} position={marker.latlng}>
-        <ShowPopup position={position} marker={marker} />
+      <Marker key={marker.id} position={marker.latlng} opacity={visited ? 0.6 : 1}>
+        <ShowPopup position={position} marker={marker} currentUser={currentUser} />
       </Marker>
     );
   }
@@ -100,7 +103,7 @@ const ShowMarkers = ({ position, markers }) => {
   return <>{markerElements}</>;
 };
 
-const ShowPopup = ({ position, marker }) => {
+const ShowPopup = ({ position, marker, currentUser }) => {
   let lat1 = position.lat
   let lng1 = position.lng
   let lat2 = marker.latlng[0]
@@ -122,21 +125,28 @@ const ShowPopup = ({ position, marker }) => {
 
   console.log(distanceTo)
 
-  return distanceTo > 40 ? null :(
-    <Popup>
-      {marker.description}
-    </Popup>
-  )
+  if (distanceTo < 40) {
+    currentUser.visited.push(marker.title)
+
+    return(
+      <Popup>
+        {marker.description}
+      </Popup>
+    )
+  } else {
+    return null
+  }
 }
 
 const App = () => {
   const [position, setPosition] = useState(null)
   const [markers, setMarkers] = useState([])
   const [loggedIn, setLoggedIn] = useState(false)
+  const [currentUser, setCurrentUser] = useState(null)
 
   // useEffect(() => {
   //   markerService
-  //     .getAll()
+  //     .getAllMarkers()
   //     .then(initialMarkers => {
   //       setMarkers(initialMarkers)
   //     })
@@ -173,8 +183,8 @@ const App = () => {
     {
       id: 3,
       latlng: [
-        61.69041189975269,
-        27.24149701054094
+        61.695609993787365,
+        27.26321017775972
       ],
       title: "paikka 3",
       description: "tietoa paikasta 3"
@@ -185,12 +195,14 @@ const App = () => {
     {
       id: 0,
       name: 'Joel',
-      password: '123'
+      password: '123',
+      visited: []
     },
     {
-      id: 0,
+      id: 1,
       name: 'Eetu',
-      password: '321'
+      password: '321',
+      visited: []
     }
   ]
 
@@ -203,11 +215,11 @@ const App = () => {
   }, [])
   if (!loggedIn) {
     return (
-      <LogInPage setLoggedIn={setLoggedIn} users={users} />
+      <LogInPage setLoggedIn={setLoggedIn} users={users} setCurrentUser={setCurrentUser} />
     )
   } else {
     return (
-      <MainApp position={position} markers={markers} setPosition={setPosition} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+      <MainApp position={position} markers={markers} setPosition={setPosition} loggedIn={loggedIn} setLoggedIn={setLoggedIn} currentUser={currentUser} />
     )
   }
 }

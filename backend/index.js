@@ -3,6 +3,7 @@ const app = express()
 require('dotenv').config()
 
 const Marker = require('./models/marker')
+const User = require('./models/user')
 
 app.use(express.static('dist'))
 const cors = require('cors')
@@ -41,6 +42,34 @@ app.post('/api/markers', (request, response, next) => {
     markerObject.save()
         .then(savedMarker => {
         response.json(savedMarker)
+        })
+        .catch(error => next(error))
+})
+
+app.get('/api/users', (request, response, next) => {
+    User.find({})
+        .then(users => {
+        response.json(users)
+        })
+        .catch(error => next(error))
+})
+
+app.post('/api/users', (request, response, next) => {
+    const body = request.body
+
+    if (body.name === undefined || body.password === undefined || body.visited === undefined) {
+        return response.status(400).json({ error: 'content missing' })
+    }
+
+    const userObject = new User({
+        name: body.name,
+        password: body.password,
+        visited: body.visited
+    })
+
+    userObject.save()
+        .then(savedUser => {
+        response.json(savedUser)
         })
         .catch(error => next(error))
 })
