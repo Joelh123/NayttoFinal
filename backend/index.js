@@ -54,6 +54,19 @@ app.get('/api/users', (request, response, next) => {
         .catch(error => next(error))
 })
 
+app.get('/api/users/:id', (request, response, next) => {
+    User.findById(request.params.id)
+        .then(user => {
+            if (user) {
+                response.json(user)
+            } else {
+                console.log('failed')
+                response.status(404).end()
+            }
+        })
+        .catch(error => next(error))
+})
+
 app.post('/api/users', (request, response, next) => {
     const body = request.body
 
@@ -70,6 +83,16 @@ app.post('/api/users', (request, response, next) => {
     userObject.save()
         .then(savedUser => {
         response.json(savedUser)
+        })
+        .catch(error => next(error))
+})
+
+app.put('/api/users/:id', (request, response, next) => {
+    const { name, password, visited } = request.body
+
+    User.findByIdAndUpdate(request.params.id, { name, password, visited }, { new: true, runValidators: true, context: 'query' })
+        .then(updatedUser => {
+            response.json(updatedUser)
         })
         .catch(error => next(error))
 })

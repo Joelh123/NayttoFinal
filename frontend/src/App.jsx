@@ -131,7 +131,18 @@ const ShowPopup = ({ position, marker, currentUser }) => {
   console.log(distanceTo)
 
   if (distanceTo < 40) {
-    currentUser.visited.push(marker.title)
+    if (!currentUser.visited.includes(marker.title)) {
+      currentUser.visited.push(marker.title)
+
+      const userObject = {
+        name: currentUser.name,
+        password: currentUser.password,
+        visited: currentUser.visited
+      }
+
+      userService
+        .update(currentUser.id, userObject)
+    }
 
     return(
       <Popup>
