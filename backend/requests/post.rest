@@ -1,8 +1,18 @@
-POST http://localhost:3001/api/markers
+POST http://localhost:3001/api/marker_presets
 Content-Type: application/json
 
 {
-    "latlng": [61.69560638690023, 27.263251805130327],
-    "title": "Myrkkylampi",
-    "description": "Myrkyllinen lampi"
+    "creator": "Eetu",
+    "markers": [
+        {
+            "latlng": [61.68790654291854, 27.272285741307183],
+            "title": "Mannerheimin patsas",
+            "description": "Mannerheimia varten pystytetty pastas"
+        },
+        {
+            "latlng": [61.686873796809714, 27.264184860795428],
+            "title": "Esedu",
+            "description": "Esedun oppilaitos"
+        }
+    ]
 }

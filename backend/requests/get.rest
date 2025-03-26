@@ -1,2 +1,2 @@
-GET http://localhost:3001/api/markers
+GET http://localhost:3001/api/marker_presets
 Content-Type: application/json

@@ -1,5 +1,5 @@
 import axios from "axios"
-const baseUrl = '/api/markers'
+const baseUrl = '/api/marker_presets'
 
 const getAll = () => {
     const request = axios.get(baseUrl)

@@ -4,10 +4,10 @@ import { TileLayer } from 'react-leaflet/TileLayer'
 import { useMap, useMapEvents } from 'react-leaflet/hooks'
 import { Marker } from 'react-leaflet/Marker'
 import { Popup } from 'react-leaflet/Popup'
-import markerService from './service/markers'
+import markerPresetService from './service/markerpresets'
 import userService from './service/users'
 
-const LogInPage = ({ setLoggedIn, users, setCurrentUser }) => {
+const LogInPage = ({ setLoggedIn, users, setCurrentUser, markerPresets, setMarkers }) => {
   const handleLogIn = e => {
     e.preventDefault();
     console.log(e.target.accountName.value)
@@ -21,6 +21,13 @@ const LogInPage = ({ setLoggedIn, users, setCurrentUser }) => {
         return
       } else if (e.target.accountName.value == user.name && e.target.password.value == user.password) {
         setCurrentUser(user)
+        console.log(user)
+        for (const markerPreset of markerPresets) {
+          if (user.name === markerPreset.creator) {
+            setMarkers(markerPreset.markers)
+          }
+        }
+
         setLoggedIn(true)
         return
       }
@@ -95,7 +102,7 @@ const ShowMarkers = ({ position, markers, currentUser }) => {
     let visited = currentUser.visited.includes(marker.title);
 
     markerElements.push(
-      <Marker key={marker.id} position={marker.latlng} opacity={visited ? 0.6 : 1}>
+      <Marker key={marker.title} position={marker.latlng} opacity={visited ? 0.6 : 1}>
         <ShowPopup position={position} marker={marker} currentUser={currentUser} />
       </Marker>
     );
@@ -157,15 +164,16 @@ const ShowPopup = ({ position, marker, currentUser }) => {
 const App = () => {
   const [position, setPosition] = useState(null)
   const [markers, setMarkers] = useState([])
+  const [markerPresets, setMarkerPresets] = useState([])
   const [loggedIn, setLoggedIn] = useState(false)
   const [users, setUsers] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
 
   useEffect(() => {
-    markerService
+    markerPresetService
       .getAll()
       .then(initialMarkers => {
-        setMarkers(initialMarkers)
+        setMarkerPresets(initialMarkers)
       })
   }, [])
 
@@ -241,7 +249,7 @@ const App = () => {
 
   if (!loggedIn) {
     return (
-      <LogInPage setLoggedIn={setLoggedIn} users={users} setCurrentUser={setCurrentUser} />
+      <LogInPage setLoggedIn={setLoggedIn} users={users} setCurrentUser={setCurrentUser} markerPresets={markerPresets} setMarkers={setMarkers} />
     )
   } else {
     return (

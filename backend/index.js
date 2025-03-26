@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 require('dotenv').config()
 
+const MarkerPreset = require('./models/markerpreset')
 const Marker = require('./models/marker')
 const User = require('./models/user')
 
@@ -26,22 +27,29 @@ app.get('/api/markers', (request, response, next) => {
         .catch(error => next(error))
 })
 
-app.post('/api/markers', (request, response, next) => {
+app.post('/api/marker_presets', (request, response, next) => {
     const body = request.body
 
-    if (body.description === undefined || body.title === undefined || body.latlng === undefined) {
+    if (body.markers === undefined || body.creator === undefined) {
         return response.status(400).json({ error: 'content missing' })
     }
 
-    const markerObject = new Marker({
-        latlng: body.latlng,
-        title: body.title,
-        description: body.description
-    })
+    const markerPresetObject = new MarkerPreset({
+        creator: body.creator,
+        markers: body.markers
+    }) 
 
-    markerObject.save()
+    markerPresetObject.save()
         .then(savedMarker => {
         response.json(savedMarker)
+        })
+        .catch(error => next(error))
+})
+
+app.get('/api/marker_presets', (request, response, next) => {
+    MarkerPreset.find({})
+        .then(markerpresets => {
+            response.json(markerpresets)
         })
         .catch(error => next(error))
 })
