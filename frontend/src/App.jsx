@@ -56,19 +56,44 @@ const MainApp = ({ position, markers, setPosition, setLoggedIn, currentUser }) =
 
   const mapRef = useRef(null);
   const latitude = 61.68784229131595
-  const lnggitude = 27.273137634746142;
+  const longitude = 27.273137634746142;
 
   return (
     <div>
-      <button onClick={() => setLoggedIn(false)}>Poistu</button>
-      <MapContainer center={[latitude, lnggitude]} zoom={17} ref={mapRef} style={{height: "98.2vh", width: "99.2vw"}}>
+      <MapContainer center={[latitude, longitude]} zoom={17} ref={mapRef} style={{height: "98.2vh", width: "99.2vw"}}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <Buttons setLoggedIn={setLoggedIn} map={mapRef} position={position} />
         <LocationMarker map={mapRef} position={position} setPosition={setPosition} />
         <ShowMarkers position={position} markers={markers} currentUser={currentUser} />
       </MapContainer>
+    </div>
+  )
+}
+
+const Buttons = ({ setLoggedIn, position }) => {
+  const quitButtonStyle = {
+    position: "absolute",
+    top: 11,
+    right: 10,
+    zIndex: 1001
+  }
+
+  const centerButtonStyle = {
+    position: "absolute",
+    top: 11,
+    right: 70,
+    zIndex: 1001
+  }
+
+  const map = useMap()
+
+  return (
+    <div>
+      <button onClick={() => setLoggedIn(false)} style={quitButtonStyle}>Poistu</button>
+      <button onClick={() => map.flyTo(!position ? [61.68784229131595, 27.273137634746142] : position)} style={centerButtonStyle}>Keskitä</button>
     </div>
   )
 }
@@ -116,24 +141,9 @@ const ShowPopup = ({ position, marker, currentUser }) => {
     return <></>;
   }
 
-  let lat1 = position.lat
-  let lng1 = position.lng
-  let lat2 = marker.latlng[0]
-  let lng2 = marker.latlng[1]
+  const map = useMap()
 
-  let dLat = ((lat2 - lat1) * Math.PI) / 180.0;
-  let dlng = ((lng2 - lng1) * Math.PI) / 180.0;
-
-  lat1 = (lat1 * Math.PI) / 180.0;
-  lat2 = (lat2 * Math.PI) / 180.0;
-
-  let a =
-    Math.pow(Math.sin(dLat / 2), 2) +
-    Math.pow(Math.sin(dlng / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
-  let rad = 6371;
-  let c = 2 * Math.asin(Math.sqrt(a));
-
-  let distanceTo = ((rad * c) * 1000).toFixed(1) 
+  let distanceTo = map.distance([position.lat, position.lng], marker.latlng) 
 
   console.log(distanceTo)
 
