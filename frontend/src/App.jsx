@@ -6,34 +6,81 @@ import { Marker } from 'react-leaflet/Marker'
 import { Popup } from 'react-leaflet/Popup'
 import markerPresetService from './service/markerpresets'
 import userService from './service/users'
+import loginService from  './service/login'
 
-const LogInPage = ({ setLoggedIn, users, setCurrentUser, markerPresets, setMarkers }) => {
-  const handleLogIn = e => {
+const LogInPage = ({ setLoggedIn, users, setUsers, setCurrentUser, markerPresets, setMarkers }) => {
+  const handleLogIn = async e => {
     e.preventDefault();
-    console.log(e.target.accountName.value)
 
-    for (const user of users) {
-      if (!e.target.accountName.value) {
-        alert('lisää s-posti')
-        return
-      } else if (!e.target.password.value) {
-        alert('lisää salasana')
-        return
-      } else if (e.target.accountName.value == user.name && e.target.password.value == user.password) {
-        setCurrentUser(user)
-        console.log(user)
-        for (const markerPreset of markerPresets) {
-          if (user.name === markerPreset.creator) {
-            setMarkers(markerPreset.markers)
-          }
-        }
-
-        setLoggedIn(true)
-        return
+    try {
+      const user = await loginService.login({
+        name: e.target.accountName.value, password: e.target.password.value,
+      })
+ 
+    for (const markerPreset of markerPresets) {
+      if (markerPreset.creator === user.name) {
+        setMarkers(markerPreset.markers)
       }
     }
 
-    alert('väärä salasana ja käyttäjätunnus yhdistelmä')
+      setCurrentUser(user)
+      setLoggedIn(true)
+
+    } catch (exception) {
+      console.log(exception)
+      alert('väärä salasana ja käyttäjätunnus yhdistelmä')
+    }
+
+
+    // for (const user of users) {
+    //   if (!e.target.accountName.value) {
+    //     alert('lisää käyttäjätunnus')
+    //     return
+    //   } else if (!e.target.password.value) {
+    //     alert('lisää salasana')
+    //     return
+    //   } else if (e.target.accountName.value == user.name && e.target.password.value == user) {
+    //     userService.setToken(user.token)
+    //     setCurrentUser(user)
+    //     console.log(user)
+    //     for (const markerPreset of markerPresets) {
+    //       if (user.name === markerPreset.creator) {
+    //         setMarkers(markerPreset.markers)
+    //         break
+    //       } else {
+    //         setMarkers([])
+    //       }
+    //     }
+    //     setLoggedIn(true)
+    //     return
+    //   }
+    // }
+    // alert('väärä salasana ja käyttäjätunnus yhdistelmä')
+  }
+
+  const handleRegistration = e => {
+    e.preventDefault()
+
+    const userObject = {
+      name: e.target.newAccountName.value,
+      password: e.target.newAccountPassword.value,
+      visited: []
+    }
+
+    const foundUser = users.find(user => user.name === e.target.newAccountName.value)
+
+    if (!foundUser) {
+      userService
+        .create(userObject)
+        .then(response => {
+          setUsers(users.concat(response))
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    } else {
+      alert('käyttäjänimi on jo käytössä')
+    }
   }
 
   return (
@@ -47,6 +94,15 @@ const LogInPage = ({ setLoggedIn, users, setCurrentUser, markerPresets, setMarke
           <input type='password' name='password' placeholder='Salasana'  />
         </div>
         <button>Kirjaudu</button>
+      </form>
+      <form onSubmit={handleRegistration}>
+        <div>
+          <input type='text' name='newAccountName' placeholder='Käyttäjätunnus' />
+        </div>
+        <div>
+          <input type='password' name='newAccountPassword' placeholder='Salasana' />
+        </div>
+        <button>Rekisteröidy</button>
       </form>
     </div>
   )
@@ -195,71 +251,9 @@ const App = () => {
       })
   }, [])
 
-  // const testMarkers = [
-  //   {
-  //     id: 0,
-  //     latlng: [
-  //       61.68701285124263,
-  //       27.266642536228886
-  //     ],
-  //     title: "paikka 0",
-  //     description: "tietoa paikasta 0"
-  //   },
-  //   {
-  //     id: 1,
-  //     latlng: [
-  //       61.68778443915931,
-  //       27.278801201368967
-  //     ],
-  //     title: "paikka 1",
-  //     description: "tietoa paikasta 1"
-  //   },
-  //   {
-  //     id: 2,
-  //     latlng: [
-  //       61.693714343527674,
-  //       27.26734346512269
-  //     ],
-  //     title: "paikka 2",
-  //     description: "tietoa paikasta 2"
-  //   },
-  //   {
-  //     id: 3,
-  //     latlng: [
-  //       61.695609993787365,
-  //       27.26321017775972
-  //     ],
-  //     title: "paikka 3",
-  //     description: "tietoa paikasta 3"
-  //   }
-  // ]
-
-  // const users = [
-  //   {
-  //     id: 0,
-  //     name: 'Joel',
-  //     password: '123',
-  //     visited: []
-  //   },
-  //   {
-  //     id: 1,
-  //     name: 'Eetu',
-  //     password: '321',
-  //     visited: []
-  //   }
-  // ]
-
-  // useEffect(() => {
-  //   setMarkers(testMarkers)
-  //   setPosition({
-  //       lat: 61.68693663746489,
-  //       lng: 27.26595425759984
-  //     })
-  // }, [])
-
   if (!loggedIn) {
     return (
-      <LogInPage setLoggedIn={setLoggedIn} users={users} setCurrentUser={setCurrentUser} markerPresets={markerPresets} setMarkers={setMarkers} />
+      <LogInPage setLoggedIn={setLoggedIn} users={users} setUsers={setUsers} setCurrentUser={setCurrentUser} markerPresets={markerPresets} setMarkers={setMarkers} />
     )
   } else {
     return (

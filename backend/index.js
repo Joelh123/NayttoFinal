@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 require('dotenv').config()
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 
 const MarkerPreset = require('./models/markerpreset')
 const Marker = require('./models/marker')
@@ -75,24 +77,51 @@ app.get('/api/users/:id', (request, response, next) => {
         .catch(error => next(error))
 })
 
-app.post('/api/users', (request, response, next) => {
-    const body = request.body
+app.post('/api/users', async (request, response) => {
+    const { name, password, visited } = request.body
 
-    if (body.name === undefined || body.password === undefined || body.visited === undefined) {
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(password, saltRounds)
+
+    const user = new User({
+        name,
+        passwordHash,
+        visited
+    })
+
+    const savedUser = await user.save()
+
+    response.status(201).json(savedUser)
+})
+
+app.post('/api/users', async (request, response, next) => {
+    const { name, password, visited } = request.body
+
+    if (name === undefined || password === undefined || visited === undefined) {
         return response.status(400).json({ error: 'content missing' })
     }
 
-    const userObject = new User({
-        name: body.name,
-        password: body.password,
-        visited: body.visited
-    })
+    const user = await User.findOne({ name })
+    const passwordCorrect = user === null
+        ? false
+        : await bcrypt.compare(password, user.passwordHash)
 
-    userObject.save()
-        .then(savedUser => {
-        response.json(savedUser)
+    if (!(user && passwordCorrect)) {
+        return response.status(401).json({
+            error: 'invalid username or password'
         })
-        .catch(error => next(error))
+    }
+
+    const userForToken = {
+        name: user.name,
+        id: user._id
+    }
+
+    const token = jwt.sign(userForToken, process.env.SECRET)
+
+    response
+        .status(200)
+        .send({ token, name: user.name, visited: user.visited })
 })
 
 app.put('/api/users/:id', (request, response, next) => {
@@ -104,6 +133,38 @@ app.put('/api/users/:id', (request, response, next) => {
         })
         .catch(error => next(error))
 })
+
+app.post('/api/login', async (request, response) => {
+    const { name, password } = request.body
+  
+    const user = await User.findOne({ name })
+    const passwordCorrect = user === null
+      ? false
+      : await bcrypt.compare(password, user.passwordHash)
+  
+    if (!(user && passwordCorrect)) {
+      return response.status(401).json({
+        error: 'invalid username or password'
+      })
+    }
+  
+    const userForToken = {
+      name: user.name,
+      id: user._id,
+    }
+  
+    // token expires in 60*60 seconds, that is, in one hour
+  
+    const token = jwt.sign(
+      userForToken, 
+      process.env.SECRET,
+      { expiresIn: 60*60 }
+    )
+  
+    response
+      .status(200)
+      .send({ token, name: user.name, visited: user.visited })
+  })
 
 app.use(unknownEndpoint)
 
