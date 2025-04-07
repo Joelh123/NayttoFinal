@@ -70,7 +70,6 @@ app.get('/api/users/:id', (request, response, next) => {
             if (user) {
                 response.json(user)
             } else {
-                console.log('failed')
                 response.status(404).end()
             }
         })

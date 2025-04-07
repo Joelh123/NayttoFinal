@@ -26,8 +26,6 @@ const LogInPage = ({ setLoggedIn, users, setUsers, setCurrentUser, markerPresets
         }
       }
 
-      console.log(user)
-
       setCurrentUser(user)
       setLoggedIn(true)
 
@@ -36,31 +34,6 @@ const LogInPage = ({ setLoggedIn, users, setUsers, setCurrentUser, markerPresets
       alert('väärä salasana ja käyttäjätunnus yhdistelmä')
     }
 
-
-    // for (const user of users) {
-    //   if (!e.target.accountName.value) {
-    //     alert('lisää käyttäjätunnus')
-    //     return
-    //   } else if (!e.target.password.value) {
-    //     alert('lisää salasana')
-    //     return
-    //   } else if (e.target.accountName.value == user.name && e.target.password.value == user) {
-    //     userService.setToken(user.token)
-    //     setCurrentUser(user)
-    //     console.log(user)
-    //     for (const markerPreset of markerPresets) {
-    //       if (user.name === markerPreset.creator) {
-    //         setMarkers(markerPreset.markers)
-    //         break
-    //       } else {
-    //         setMarkers([])
-    //       }
-    //     }
-    //     setLoggedIn(true)
-    //     return
-    //   }
-    // }
-    // alert('väärä salasana ja käyttäjätunnus yhdistelmä')
   }
 
   const handleRegistration = e => {
@@ -83,6 +56,7 @@ const LogInPage = ({ setLoggedIn, users, setUsers, setCurrentUser, markerPresets
         .catch(error => {
           console.log(error)
         })
+      alert("rekisteröinti onnistui")
     } else {
       alert('käyttäjänimi on jo käytössä')
     }
@@ -206,13 +180,9 @@ const ShowPopup = ({ position, marker, currentUser }) => {
 
   let distanceTo = map.distance([position.lat, position.lng], marker.latlng) 
 
-  console.log(distanceTo)
-
   if (distanceTo < 40) {
     if (!currentUser.visited.includes(marker.title)) {
       currentUser.visited.push(marker.title)
-
-      console.log(currentUser.visited)
 
       const userObject = {
         name: currentUser.name,
