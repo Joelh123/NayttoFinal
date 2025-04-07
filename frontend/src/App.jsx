@@ -16,12 +16,17 @@ const LogInPage = ({ setLoggedIn, users, setUsers, setCurrentUser, markerPresets
       const user = await loginService.login({
         name: e.target.accountName.value, password: e.target.password.value,
       })
- 
-    for (const markerPreset of markerPresets) {
-      if (markerPreset.creator === user.name) {
-        setMarkers(markerPreset.markers)
+  
+      for (const markerPreset of markerPresets) {
+        if (markerPreset.creator === user.name) {
+          setMarkers(markerPreset.markers)
+          break
+        } else {
+          setMarkers([])
+        }
       }
-    }
+
+      console.log(user)
 
       setCurrentUser(user)
       setLoggedIn(true)
@@ -206,6 +211,8 @@ const ShowPopup = ({ position, marker, currentUser }) => {
   if (distanceTo < 40) {
     if (!currentUser.visited.includes(marker.title)) {
       currentUser.visited.push(marker.title)
+
+      console.log(currentUser.visited)
 
       const userObject = {
         name: currentUser.name,

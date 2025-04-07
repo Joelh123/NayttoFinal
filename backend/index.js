@@ -125,9 +125,15 @@ app.post('/api/users', async (request, response, next) => {
 })
 
 app.put('/api/users/:id', (request, response, next) => {
-    const { name, password, visited } = request.body
+    const body = request.body
 
-    User.findByIdAndUpdate(request.params.id, { name, password, visited }, { new: true, runValidators: true, context: 'query' })
+    const user = {
+        name: body.name,
+        visited: body.visited,
+        id: body.id
+    }
+    
+    User.findByIdAndUpdate(request.params.id, user, { new: true })
         .then(updatedUser => {
             response.json(updatedUser)
         })
@@ -152,9 +158,7 @@ app.post('/api/login', async (request, response) => {
       name: user.name,
       id: user._id,
     }
-  
-    // token expires in 60*60 seconds, that is, in one hour
-  
+    
     const token = jwt.sign(
       userForToken, 
       process.env.SECRET,
@@ -163,7 +167,7 @@ app.post('/api/login', async (request, response) => {
   
     response
       .status(200)
-      .send({ token, name: user.name, visited: user.visited })
+      .send({ token, name: user.name, visited: user.visited, id: user.id })
   })
 
 app.use(unknownEndpoint)
