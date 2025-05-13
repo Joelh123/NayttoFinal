@@ -45,6 +45,10 @@ const LogInPage = ({ setLoggedIn, users, setUsers, setCurrentUser, markerPresets
       visited: []
     }
 
+    if (e.target.newAccountName.value === "" || e.target.newAccountPassword.value === "") {
+      return alert('syötä käyttäjänimi ja salasana')
+    }
+
     const foundUser = users.find(user => user.name === e.target.newAccountName.value)
 
     if (!foundUser) {
